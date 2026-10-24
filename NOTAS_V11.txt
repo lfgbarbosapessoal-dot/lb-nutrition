@@ -1,0 +1,1 @@
+V11: Interface simplificada, catálogo pesquisável, alimentos adicionais e seleção de alternativas. Valores nutricionais aproximados por porção, ainda não validados. Não apagar dados locais.
