@@ -215,7 +215,7 @@ function addToShopping(id){
  db.v12Shopping??=[];if(!db.v12Shopping.includes(name))db.v12Shopping.push(name);
  save();syncShopping();autoFeedback('Alimento acrescentado à lista de compras.');
 }
-A.v12Replace=replace;A.v12Alternatives=selectSwap;A.v12Record=record;A.v12Purchased=buy;A.v12ShoppingAdd=addToShopping;
+A.v12RefreshMeals=renderMeals;A.v12Replace=replace;A.v12Alternatives=selectSwap;A.v12Record=record;A.v12Purchased=buy;A.v12ShoppingAdd=addToShopping;
 A.autoGenerateAll=regenerate;A.autoTraining=train;
 A.autoSwap=()=>alert('Agora podes substituir cada alimento individualmente.');
 A.autoPantry=()=>alert('O plano já utiliza exclusivamente a despensa.');
