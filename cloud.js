@@ -1,0 +1,14 @@
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+const cfg={apiKey:"AIzaSyDn9WoTnuVFKs7QtPlWTBWIIwNNBxpGcp4",authDomain:"gym-lb.firebaseapp.com",projectId:"gym-lb",storageBucket:"gym-lb.firebasestorage.app",messagingSenderId:"1030152471768",appId:"1:1030152471768:web:5317679e04bad8fa3883ad"};
+const app=initializeApp(cfg,'lb-nutrition'),auth=getAuth(app),store=getFirestore(app);
+const $=id=>document.getElementById(id),status=(txt,msg='')=>{$('cloudStatus').textContent=txt;$('cloudMessage').textContent=msg};
+const ref=()=>doc(store,'nutritionUsers',auth.currentUser.uid);
+const login=()=>signInWithEmailAndPassword(auth,$('cloudEmail').value,$('cloudPassword').value).catch(e=>status('Erro',e.message));
+const register=()=>createUserWithEmailAndPassword(auth,$('cloudEmail').value,$('cloudPassword').value).catch(e=>status('Erro',e.message));
+const logout=()=>signOut(auth);
+const upload=async()=>{if(!auth.currentUser)return;try{status('A enviar…');await setDoc(ref(),{data:db,updatedAt:serverTimestamp()});status('Na nuvem','Cópia enviada. No outro dispositivo, escolhe «Receber dados da nuvem».')}catch(e){status('Erro',e.message)}};
+const download=async()=>{if(!auth.currentUser)return;try{status('A receber…');let snap=await getDoc(ref());if(!snap.exists())return status('Sem cópia','Ainda não há dados na nuvem. Envia primeiro os dados do dispositivo principal.');let incoming=snap.data().data;if(!incoming||!Array.isArray(incoming.stock)||!incoming.days)return status('Erro','Dados inválidos na nuvem.');if(!confirm('Substituir os dados locais pelos dados da nuvem? Exporta uma cópia de segurança primeiro.'))return status('Cancelado');db=incoming;db.plans??={};db.stockLedger??={};save();render();status('Recebido','Dados da nuvem aplicados.')}catch(e){status('Erro',e.message)}};
+window.nutriCloud={login,register,logout,upload,download};
+onAuthStateChanged(auth,u=>{$('cloudLogin').style.display=u?'none':'grid';$('cloudActions').style.display=u?'block':'none';$('cloudUser').textContent=u?.email||'';status(u?'Ligado':'Local')});

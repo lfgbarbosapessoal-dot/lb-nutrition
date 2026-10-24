@@ -1,0 +1,12 @@
+LB NUTRITION V6 — CATÁLOGO NUTRICIONAL EXPERIMENTAL
+
+1. Exporta primeiro os teus dados em Mais > Exportar.
+2. Publica os ficheiros do ZIP na raiz do repositório GitHub Pages LB Nutrition.
+3. Não precisas de alterar as regras do Firebase se a V5 já sincronizava.
+4. Fecha e reabre a app após a publicação. Confirma os stocks e registos.
+
+NOVO: catálogo com fichas aproximadas por porção caseira para alimentos comuns; seleção no formulário de adicionar à despensa. Produtos fora do catálogo podem ser guardados na despensa, mas não entram no cálculo de macronutrientes. As refeições do gerador continuam a usar combinações predefinidas e só consideram os ingredientes que conseguem reconhecer.
+
+IMPORTANTE: os valores não foram importados nem validados diretamente com PortFIR. São referências genéricas ilustrativas, com variação por marca, corte, preparação e tamanho da porção. As estimativas de calorias e macros podem omitir ingredientes, sobretudo azeite, molhos e receitas compostas. Não são apropriadas para uma prescrição calórica exata nem para calcular uma dose de whey automaticamente. A ligação Firebase continua manual.
+
+A sincronização manual envia ou recebe o documento completo. Não edites em simultâneo em dois dispositivos; faz backup antes de receber.

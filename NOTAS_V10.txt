@@ -1,0 +1,1 @@
+V10: repostos os ciclos de otimização da V7; catálogo alargado com frutos secos, fruta, leguminosas e proteínas; botão Da despensa; sobremesas apenas no catálogo, não no gerador. Valores estimados, verificar rótulos. Testar após publicar em HTTPS. Não apagar armazenamento local.

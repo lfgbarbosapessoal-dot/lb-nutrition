@@ -1,0 +1,4 @@
+LB Nutrition V8 — navegação simplificada e correção de desempenho.
+O plano automático é o principal; o plano antigo permanece acessível em Mais.
+Não limpa dados existentes. Firebase continua com sincronização manual.
+A composição nutricional continua estimativa e necessita validação.

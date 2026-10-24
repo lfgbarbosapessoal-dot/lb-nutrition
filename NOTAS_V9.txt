@@ -1,0 +1,1 @@
+LB Nutrition V9: reduzido o custo da geração automática, funções dos botões expostas explicitamente, erros apresentados no ecrã e removido o bloco explicativo. Os dados existentes são preservados. Testar após publicação e atualização da cache.

@@ -1,0 +1,9 @@
+LB Nutrition V7 — motor automático experimental
+
+Instalar: fazer cópia de segurança na V6, carregar os ficheiros deste ZIP no repositório e aguardar GitHub Pages.
+
+A V7 preserva os dados existentes e o ecrã anterior. A nova aba Automático gera refeições com base em metas de 2450/2250 kcal e proteína 140 g, priorizando despensa. Valores dos alimentos são aproximações ilustrativas e NÃO fichas validadas por base oficial.
+
+Limitações: registo automático não desconta stock; não sincroniza automaticamente, usar Enviar/Receber dados da nuvem nas definições. A geração de refeições usa pesquisa heurística e deve ser revista antes de utilização diária.
+
+Evitar ervilhas; alergias devem ser confirmadas nas definições antes de usar.
