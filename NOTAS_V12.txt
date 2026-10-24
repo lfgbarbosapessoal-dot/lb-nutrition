@@ -1,0 +1,1 @@
+V12: refeições geradas apenas com stock disponível; substituições ingrediente a ingrediente; descontos reversíveis; catálogo adiciona com stock zero; compra confirmada exige quantidade. ATENÇÃO: dados nutricionais ainda aproximados, equivalências de medidas caseiras simplificadas. Faça cópia dos dados antes de atualizar. Testar num navegador HTTPS.
