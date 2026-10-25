@@ -24,7 +24,7 @@ function stockCapacity(id){
  if(unit.includes('pacote')||unit.includes('embalagem')){
   const m=unit.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)/);
   if(m&&grams){let mult=(m[2]==='kg'||m[2]==='l')?1000:1;return qty*Number(m[1].replace(',','.'))*mult/grams}
-  return 0; // no known package size: avoid inventing servings
+  return qty; // package without size: treat as a single household serving, flag as estimate
  }
  return qty; // "porções", "taças", "latas" etc. = one recipe serving each
 }
@@ -38,7 +38,7 @@ function committed(){
  }return out;
 }
 function remaining(id,excludeMeal=-1){
- const day=autoDb()[autoToday()]||{},used=0;
+ const day=autoDb()[autoToday()]||{};
  let reserved=0;
  for(const [index,m] of Object.entries(day)){
   if(+index===excludeMeal||m.done)continue;
@@ -55,31 +55,44 @@ function nutrientScore(parts,i){
  return 2*Math.abs(n.kcal-energy)/energy+1.3*Math.abs(n.p-protein)/protein+.4*Math.abs(n.f-fat)/fat;
 }
 function makeMeal(i){
- const groups=choices[i];let pool=categories.map(cat=>(groups[cat]||[]).filter(id=>remaining(id,i)>=.5));
- if(pool.some((ids,j)=>categories[j]!=='v'&&ids.length===0))return null;
+ // Proteína + hidrato são the core of a meal. Fruit, vegetables and fats are optional
+ // if unavailable. Never require an ingredient merely to satisfy a rigid template.
+ const groups=choices[i];
+ const pool={};for(const cat of categories)pool[cat]=(groups[cat]||[]).filter(id=>foods[id]&&remaining(id,i)>=.25);
  const existing=Object.values(autoDb()[autoToday()]||{}).flatMap(m=>(m.parts||[]).map(x=>x.id));
+ const core=['p','c'];
+ // If one group is unavailable, build the best feasible partial meal and mark it
+ // nutritionally incomplete, instead of claiming the whole pantry is empty.
+ const present=core.filter(cat=>pool[cat].length);
+ if(!present.length)return null;
  let best=null;
- for(let n=0;n<260;n++){
+ for(let n=0;n<200;n++){
   let parts=[];
-  for(let j=0;j<categories.length;j++){
-   if(!pool[j].length)continue;
-   const ids=pool[j],id=ids[Math.floor(Math.random()*ids.length)];
-   parts.push({id,q:.5});
+  for(const cat of categories){
+   if(!pool[cat].length)continue;
+   if(cat==='v'||cat==='f'||cat==='g'){
+    // Include when stock allows; never block the main meal for lack of olive oil or fruit.
+    if(Math.random()<.13)continue;
+   }
+   const id=pool[cat][Math.floor(Math.random()*pool[cat].length)];
+   parts.push({id,q:.25});
   }
   if(!valid(parts,i))continue;
-  for(let k=0;k<18;k++){
+  for(let k=0;k<24;k++){
    let candidate=null,old=nutrientScore(parts,i);
    for(let j=0;j<parts.length;j++)for(const delta of [-.25,.25]){
     const q=+(parts[j].q+delta).toFixed(2);
-    if(q<.5||q>2.5)continue;
+    if(q<.25||q>3)continue;
     const trial=parts.map(x=>({...x}));trial[j].q=q;
     if(!valid(trial,i))continue;
     const score=nutrientScore(trial,i);
-    if(score<old-.006){old=score;candidate=trial}
+    if(score<old-.005){old=score;candidate=trial}
    }
    if(!candidate)break;parts=candidate;
   }
-  const score=nutrientScore(parts,i)+parts.filter(x=>existing.includes(x.id)).length*.12;
+  const score=nutrientScore(parts,i)+parts.filter(x=>existing.includes(x.id)).length*.08+
+   (pool.p.length&&!parts.some(x=>foods[x.id][1]==='proteina')?4:0)+
+   (pool.c.length&&!parts.some(x=>foods[x.id][1]==='hidrato')?4:0);
   if(!best||score<best.score)best={parts,score};
  }
  return best?.parts||null;
@@ -89,7 +102,7 @@ function regenerate(){
  if(Object.values(day).some(m=>m.done)){
   alert('Existem refeições já consumidas. Desfaz primeiro os registos para criar um novo plano.');return;
  }
- const old=autoDb()[k];autoDb()[k]={};
+ autoDb()[k]={};
  let missing=[];
  for(let i=0;i<4;i++){
   const parts=makeMeal(i);
@@ -97,7 +110,7 @@ function regenerate(){
   else missing.push(AUTO_KEYS[i]);
  }
  save();renderMeals();
- if(missing.length)autoFeedback('Stock insuficiente para: '+missing.join(', ')+'. Acrescenta ingredientes à despensa ou à lista de compras.');
+ if(missing.length)autoFeedback('Não há proteína nem acompanhamento compatível em stock para: '+missing.join(', ')+'. Verifica as quantidades na despensa.');
  else autoFeedback('Plano criado apenas com alimentos disponíveis na despensa.');
 }
 function train(v){
@@ -153,7 +166,7 @@ function record(i){
   for(const item of db.autoStockLedger[key]||[]){const s=db.stock.find(x=>x.name===item.name);if(s)s.qty=+(+s.qty+item.qty).toFixed(3)}
   delete db.autoStockLedger[key];m.done=false;save();render();renderMeals();autoFeedback('Registo desfeito e stock reposto.');return;
  }
- if(!valid(m.parts,i))return alert('A quantidade disponível já não é suficiente.');
+ if(!valid(m.parts,i))return alert('A quantidade disponível já não é suficiente para esta porção.');
  const amounts={};
  for(const part of m.parts){
   const s=stockFor(part.id),qty=stockUsed(part.id,part.q);
@@ -222,7 +235,11 @@ A.autoPantry=()=>alert('O plano já utiliza exclusivamente a despensa.');
 // Preserve existing meals on upgrade, but mark shortages; never silently change consumed meals.
 if(!db.autoStockLedger)db.autoStockLedger={};
 if(!db.autoMeals||!db.autoMeals[autoToday()]||Object.keys(db.autoMeals[autoToday()]).length===0)regenerate();
-else renderMeals();
+else {
+ const day=autoDb()[autoToday()];
+ if(!Object.values(day).some(m=>m.done)&&Object.entries(day).some(([i,m])=>m&&!valid(m.parts,+i))){regenerate();}
+ else renderMeals();
+}
 const oldTab=window.tab;
 window.tab=function(id){oldTab(id);if(id==='auto')renderMeals();if(id==='shopping')syncShopping()};
 const oldRender=window.render;

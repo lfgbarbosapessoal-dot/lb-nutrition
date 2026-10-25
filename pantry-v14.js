@@ -11,11 +11,11 @@ function init(){
  db.v14??={shopping:[],hidden:[]};
  db.v14.shopping??=[];db.v14.hidden??=[];
  // Migrate only explicitly added shopping entries from older versions.
- for(const n of [...(db.v13?.extra||[]),...(db.v12Shopping||[])]){
+ for(const n of (db.v14.migrated?[]:[...(db.v13?.extra||[]),...(db.v12Shopping||[])])){
   if(!db.v14.shopping.some(x=>norm(x)===norm(n)))db.v14.shopping.push(n);
  }
  db.v13&&(db.v13.extra=[]);
- db.v12Shopping=[];
+ db.v12Shopping=[];db.v14.migrated=true;
  for(const s of stock()){
   s.qty=Math.max(0,Number(s.qty)||0);
   s.unit=s.unit||'porções';
